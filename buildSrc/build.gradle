@@ -5,3 +5,5 @@ repositories {
 dependencies {
     compile group: 'org.yaml', name: 'snakeyaml', version: '1.18'
 }
+
+sourceCompatibility = 1.8
