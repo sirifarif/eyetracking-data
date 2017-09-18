@@ -1,1 +1,4 @@
 rootProject.name = 'eyetracking-data'
+(2..8).each {
+    include sprintf('vp0%d', it)
+}
