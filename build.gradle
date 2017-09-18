@@ -57,6 +57,13 @@ subprojects {
         destFile = file("$buildDir/data/scenes.yaml")
     }
 
+    task generatePraatScenes(type: GeneratePraatScenes) {
+        dependsOn extractScenes
+        scenesFile = extractScenes.destFile
+        audioFile = file("$rootDir/src/experiment/northwind_rm.flac")
+        destDir = file("$buildDir/scenes")
+    }
+
     task convertScenesToSrt(type: ConvertScenesToSrt) {
         dependsOn extractScenes
         srcFile = extractScenes.destFile
