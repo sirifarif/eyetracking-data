@@ -27,7 +27,7 @@ class ExtractScenesToSrt extends DefaultTask {
                     def end = formatInstantToTimestamp(frame.date.toInstant(), offset)
                     srt.println "${index++}"
                     srt.println "$start --> $end"
-                    srt.println "{ start: $prevFrame.window.start, end: $prevFrame.window.end }\n"
+                    srt.println sprintf('{ start: %.6f, end: %.6f }\n', prevFrame.window.start, prevFrame.window.end)
                     prevFrame = frame
                 }
             }
@@ -35,7 +35,7 @@ class ExtractScenesToSrt extends DefaultTask {
             def end = formatInstantToTimestamp(frame.date.toInstant(), offset)
             srt.println "$index"
             srt.println "$start --> $end"
-            srt.println "{ start: $frame.window.start, end: $frame.window.end }"
+            srt.println sprintf('{ start: %.6f, end: %.6f }', frame.window.start, frame.window.end)
         }
     }
 
