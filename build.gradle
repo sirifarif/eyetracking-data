@@ -51,20 +51,26 @@ subprojects {
         destFile = file("$buildDir/data/praat.yaml")
     }
 
-    task extractScenesToSrt(type: ExtractScenesToSrt) {
+    task extractScenes(type: ExtractScenes) {
         dependsOn convertPraatLogToYaml
         srcFile = convertPraatLogToYaml.destFile
+        destFile = file("$buildDir/data/scenes.yaml")
+    }
+
+    task convertScenesToSrt(type: ConvertScenesToSrt) {
+        dependsOn extractScenes
+        srcFile = extractScenes.destFile
         destFile = file("$buildDir/data/scenes.srt")
     }
 
     task muxStreams(type: Exec) {
-        dependsOn unpackData, extractScenesToSrt
+        dependsOn unpackData, convertScenesToSrt
         def destFile = file("$buildDir/data/${project.name}.mkv")
         outputs.file destFile
         commandLine 'ffmpeg', '-loglevel', 'panic', '-y',
                 '-i', file("$unpackData.destinationDir/screencapture.mp4"),
                 '-i', file("$unpackData.destinationDir/audio.flac"),
-                '-i', extractScenesToSrt.destFile, '-disposition:s:0', 'default',
+                '-i', convertScenesToSrt.destFile, '-disposition:s:0', 'default',
                 '-codec', 'copy', destFile
     }
 }
