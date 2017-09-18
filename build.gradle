@@ -50,4 +50,10 @@ subprojects {
         srcFile = file("$unpackData.destinationDir/praat.log")
         destFile = file("$buildDir/data/praat.yaml")
     }
+
+    task extractScenesToWebVTT(type: ExtractScenesToWebVTT) {
+        dependsOn convertPraatLogToYaml
+        srcFile = convertPraatLogToYaml.destFile
+        destFile = file("$buildDir/data/scenes.vtt")
+    }
 }
