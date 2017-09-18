@@ -4,7 +4,7 @@ import org.yaml.snakeyaml.Yaml
 
 import java.time.*
 
-class ExtractScenesToWebVTT extends DefaultTask {
+class ExtractScenesToSrt extends DefaultTask {
 
     @InputFile
     File srcFile
@@ -14,8 +14,8 @@ class ExtractScenesToWebVTT extends DefaultTask {
 
     @TaskAction
     void extract() {
-        destFile.withWriter { vtt ->
-            vtt.println 'WEBVTT'
+        destFile.withWriter { srt ->
+            def index = 1
             def frameIter = new Yaml().load(srcFile.newReader()).iterator()
             def prevFrame = frameIter.next()
             def frame
@@ -25,24 +25,28 @@ class ExtractScenesToWebVTT extends DefaultTask {
                 if (prevFrame.window != frame.window) {
                     def start = formatInstantToTimestamp(prevFrame.date.toInstant(), offset)
                     def end = formatInstantToTimestamp(frame.date.toInstant(), offset)
-                    vtt.println "\n$start --> $end"
-                    vtt.println "{ start: $prevFrame.window.start, end: $prevFrame.window.end }"
+                    srt.println "${index++}"
+                    srt.println "$start --> $end"
+                    srt.println "{ start: $prevFrame.window.start, end: $prevFrame.window.end }\n"
                     prevFrame = frame
                 }
             }
             def start = formatInstantToTimestamp(prevFrame.date.toInstant(), offset)
             def end = formatInstantToTimestamp(frame.date.toInstant(), offset)
-            vtt.println "\n$start --> $end"
-            vtt.println "{ start: $frame.window.start, end: $frame.window.end }"
+            srt.println "$index"
+            srt.println "$start --> $end"
+            srt.println "{ start: $frame.window.start, end: $frame.window.end }"
         }
     }
 
     String formatInstantToTimestamp(Instant instant, Instant offset) {
         def duration = Duration.between(offset, instant)
-        [
+        def fields = [
                 duration.toHours(),
                 duration.toMinutes() - duration.toHours() * 60,
-                duration.seconds - duration.toMinutes() * 60
-        ].collect { "$it".padLeft(2, '0') }.join(':')
+                duration.seconds - duration.toMinutes() * 60,
+                duration.toMillis() - duration.seconds * 1000
+        ]
+        sprintf '%02d:%02d:%02d,%03d', fields
     }
 }
