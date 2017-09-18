@@ -23,4 +23,25 @@ subprojects {
         data group: 'org.m2ci.msp.eyetracking', name: "raw-data-$project.name-textgrid", version: '0.1', ext: 'zip'
         data group: 'org.m2ci.msp.eyetracking', name: "raw-data-$project.name-tobii", version: '0.1', ext: 'zip'
     }
+
+    task unpackData(type: Copy) {
+        from configurations.data
+        into "$buildDir/rawData"
+        filesMatching '*.zip', { zipFileDetails ->
+            project.copy {
+                from project.zipTree(zipFileDetails.file)
+                into destinationDir
+            }
+            zipFileDetails.exclude()
+        }
+        filesMatching '*.mkv', { mkvFileDetails ->
+            project.exec {
+                commandLine 'ffmpeg', '-i', mkvFileDetails.file,
+                        '-map', '0:0', '-codec', 'copy', "$destinationDir/screencapture.mp4",
+                        '-map', '0:1', '-codec', 'copy', "$destinationDir/audio.flac",
+                        '-loglevel', 'panic', '-y'
+            }
+            mkvFileDetails.exclude()
+        }
+    }
 }
