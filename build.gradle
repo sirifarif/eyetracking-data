@@ -44,4 +44,10 @@ subprojects {
             mkvFileDetails.exclude()
         }
     }
+
+    task convertPraatLogToYaml(type: ConvertPraatLogToYaml) {
+        dependsOn unpackData
+        srcFile = file("$unpackData.destinationDir/praat.log")
+        destFile = file("$buildDir/data/praat.yaml")
+    }
 }
