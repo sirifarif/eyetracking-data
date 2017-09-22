@@ -82,6 +82,6 @@ class PraatSceneGenerator implements Runnable {
             script.println 'Select outer viewport... 0 6 0 8'
             script.println "Save as 300-dpi PNG file... $pngFile"
         }
-        ['/usr/local/bin/praat', '--no-pref-files', '--no-plugins', '--run', scriptFile].execute()
+        ['/usr/local/bin/praat', '--no-pref-files', '--no-plugins', '--run', scriptFile].execute().waitFor()
     }
 }
