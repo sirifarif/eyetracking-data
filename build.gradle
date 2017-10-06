@@ -77,11 +77,6 @@ subprojects {
         destFile = file("$buildDir/data/scenes.srt")
     }
 
-    task fixOffsets(type: FixOffsets) {
-        praatlog = file("$unpackData.destinationDir/praat.log")
-        tobiilog = file("$unpackData.destinationDir/Audio_Data_Export.tsv")
-    }
-
     task muxStreams(type: Exec) {
         dependsOn unpackData, convertScenesToSrt
         def destFile = file("$buildDir/data/${project.name}.mkv")
