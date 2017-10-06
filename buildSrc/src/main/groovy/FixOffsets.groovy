@@ -13,7 +13,7 @@ class FixOffsets extends DefaultTask {
     @TaskAction
     void findOffsets() {
         def offSet = (praatStart(praatlog).getTime() - tobiiStart(tobiilog).getTime()) / 1000
-        println "offset is $offSet Seconds"
+        project.file("gradle.properties").text = "offset=$offSet"
     }
 
     Date praatStart(File praatlog) {
