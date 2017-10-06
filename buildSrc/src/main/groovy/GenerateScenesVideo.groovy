@@ -1,8 +1,13 @@
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.*
+import org.gradle.workers.*
 import org.yaml.snakeyaml.Yaml
 
-class GenerateVideoFile extends DefaultTask {
+import javax.inject.Inject
+
+class GenerateSceneVideoSegments extends DefaultTask {
+
+    final WorkerExecutor workerExecutor
 
     @InputFile
     File scenesFile
@@ -10,27 +15,44 @@ class GenerateVideoFile extends DefaultTask {
     @InputDirectory
     File inputDir
 
-    @OutputFile
-    File videoFile
+    @OutputDirectory
+    File destDir
+
+    @Inject
+    GenerateSceneVideoSegments(WorkerExecutor workerExecutor) {
+        this.workerExecutor = workerExecutor
+    }
 
     @TaskAction
     void generate() {
-
-        def sceneId = []
-        new File("$inputDir").eachFileMatch(~/.*.png/) { file ->
-            sceneId.add(project.relativePath(file))
-        }
-        def scriptFile = project.file("$project.projectDir/concat.txt")
-        scriptFile.withWriter { script ->
-            new Yaml().load(scenesFile.newReader()).eachWithIndex { scene, s ->
-                def duration = groovy.time.TimeCategory.minus(scene.end, scene.start).seconds
-                script.println "file '${sceneId[s]}'"
-                script.println "duration $duration"
+        new Yaml().load(scenesFile.newReader()).eachWithIndex { scene, s ->
+            def pngFile = project.file("$inputDir/scene_${sprintf('%04d', s + 1)}.png")
+            def duration = groovy.time.TimeCategory.minus(scene.end, scene.start).seconds
+            def videoFile = project.file("$destDir/scene_${sprintf('%04d', s + 1)}.mp4")
+            workerExecutor.submit(SceneVideoGenerator.class) { WorkerConfiguration config ->
+                config.params pngFile, duration * 25, videoFile
             }
         }
-        project.exec {
-            workingDir project.projectDir
-            commandLine 'ffmpeg', '-f', 'concat', '-i', scriptFile, '-s', '720x480', '-c:v', 'libx264', '-crf', '18', '-vf', 'fps=25', '-pix_fmt', 'yuv420p', '-y', videoFile
-        }
+    }
+}
+
+class SceneVideoGenerator implements Runnable {
+
+    File pngFile
+    int frames
+    File videoFile
+
+    @Inject
+    SceneVideoGenerator(File pngFile, int frames, File videoFile) {
+        this.pngFile = pngFile
+        this.frames = frames
+        this.videoFile = videoFile
+    }
+
+    @Override
+    void run() {
+        def commandLine = ['ffmpeg', '-r', 25, '-f', 'image2', '-s', '1920x1080', '-i', pngFile, '-vframes', frames, '-vcodec', 'libx264', '-crf', 25, '-pix_fmt', 'yuv420p', videoFile, '-y']
+        println commandLine.join(" ")
+        commandLine.execute().waitFor()
     }
 }
