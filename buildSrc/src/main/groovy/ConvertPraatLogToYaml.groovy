@@ -1,3 +1,4 @@
+import groovy.time.TimeCategory
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.*
 import org.yaml.snakeyaml.*
@@ -17,14 +18,20 @@ class ConvertPraatLogToYaml extends DefaultTask {
         def yaml = new Yaml(opts)
         def frames = []
         def frameStr = ''
+        def offsetStr = project.findProperty('offset')
+        def offset = offsetStr ? Float.parseFloat(offsetStr).round() : 0
         srcFile.eachLine { line ->
             switch (line) {
                 case ~/^Editor type:.+/:
                     if (frameStr) {
                         def map = yaml.load(frameStr)
+                        def date = Date.parse('EEE MMM dd HH:mm:ss yyyy', map.Date, TimeZone.getTimeZone('Europe/Berlin'))
+                        use(TimeCategory) {
+                            date = date - offset.seconds
+                        }
                         frames << [window: [start: (map.'Window start' - 'seconds') as double,
                                             end  : (map.'Window end' - 'seconds') as double],
-                                   date  : Date.parse('EEE MMM dd HH:mm:ss yyyy', map.Date, TimeZone.getTimeZone('Europe/Berlin'))]
+                                   date  : date]
                     }
                     frameStr = "$line\n"
                     break
