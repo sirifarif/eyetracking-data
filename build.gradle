@@ -64,6 +64,13 @@ subprojects {
         destDir = file("$buildDir/scenes")
     }
 
+    task generateScenesVideo(type: GenerateVideoFile) {
+        dependsOn extractScenes, generatePraatScenes
+        scenesFile = extractScenes.destFile
+        inputDir = generatePraatScenes.destDir
+        videoFile = file("$buildDir/video/sceneVideo.mp4")
+    }
+
     task convertScenesToSrt(type: ConvertScenesToSrt) {
         dependsOn extractScenes
         srcFile = extractScenes.destFile
