@@ -4,6 +4,7 @@ repositories {
 
 dependencies {
     compile group: 'org.yaml', name: 'snakeyaml', version: '1.18'
+    compile group: 'com.xlson.groovycsv', name: 'groovycsv', version: '1.0'
 }
 
 sourceCompatibility = 1.8
