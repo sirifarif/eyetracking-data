@@ -32,16 +32,16 @@ class GenerateSceneVideoSegments extends DefaultTask {
             def pngFile = project.file("$inputDir/scene_${sprintf('%04d', s + 1)}.png")
             def duration = groovy.time.TimeCategory.minus(scene.end, scene.start).seconds
             def videoFile = project.file("$destDir/scene_${sprintf('%04d', s + 1)}.mp4")
-			movieListFile.append "file '$videoFile'\n"
+            movieListFile.append "file '$videoFile'\n"
             workerExecutor.submit(SceneVideoGenerator.class) { WorkerConfiguration config ->
                 config.params pngFile, duration, videoFile
             }
         }
         workerExecutor.await()
-		project.exec {
-			commandLine 'ffmpeg', '-safe', '0', '-f', 'concat', '-i', movieListFile, '-c', 'copy', '-y', finalVideoFile
-		}
-	}
+        project.exec {
+            commandLine 'ffmpeg', '-safe', '0', '-f', 'concat', '-i', movieListFile, '-c', 'copy', '-y', finalVideoFile
+        }
+    }
 }
 
 class SceneVideoGenerator implements Runnable {
@@ -59,7 +59,7 @@ class SceneVideoGenerator implements Runnable {
 
     @Override
     void run() {
-        def commandLine = ['ffmpeg', '-framerate', 1/duration, '-s', '1920x1080', '-i', pngFile, '-vcodec', 'libx264', '-crf', 25, '-pix_fmt', 'yuv420p', '-r', 10, videoFile, '-y']
+        def commandLine = ['ffmpeg', '-framerate', 1 / duration, '-s', '1920x1080', '-i', pngFile, '-vcodec', 'libx264', '-crf', 25, '-pix_fmt', 'yuv420p', '-r', 10, videoFile, '-y']
         println commandLine.join(" ")
         commandLine.execute().waitFor()
     }
