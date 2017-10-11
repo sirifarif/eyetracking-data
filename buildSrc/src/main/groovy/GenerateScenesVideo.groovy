@@ -25,8 +25,19 @@ class GenerateSceneVideoSegments extends DefaultTask {
 
     @TaskAction
     void generate() {
-        def movieListFile = new File("$temporaryDir/movieList.txt")
+        def movieListFile = project.file("$temporaryDir/movieList.txt")
         movieListFile.text = ''
+        def firstFrame = project.file("$project.rootDir/praat.png")
+        def firstFrameVideo = project.file("$destDir/firstFrameVideo_${project.name}.mp4")
+        def offsetStr = project.findProperty('offset')
+        def padding = offsetStr ? Float.parseFloat(offsetStr).round().abs() : 0
+        if(padding > 0) {
+            workerExecutor.submit(SceneVideoGenerator.class) { WorkerConfiguration config ->
+                config.params firstFrame, padding, firstFrameVideo
+            }
+            workerExecutor.await()
+            movieListFile.text = "file '$firstFrameVideo'\n"
+        }
         def finalVideoFile = project.file("$project.buildDir/sceneMovie.mp4")
         new Yaml().load(scenesFile.newReader()).eachWithIndex { scene, s ->
             def pngFile = project.file("$inputDir/scene_${sprintf('%04d', s + 1)}.png")
