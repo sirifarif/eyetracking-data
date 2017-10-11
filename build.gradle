@@ -90,6 +90,11 @@ subprojects {
         destFile = file("$buildDir/data/mergedData.yaml")
     }
 
+    task findOffsets(type: FindOffsets) {
+        praatlog = file("$unpackData.destinationDir/praat.log")
+        tobiilog = file("$unpackData.destinationDir/Audio_Data_Export.tsv")
+    }
+
     task muxStreams(type: Exec) {
         dependsOn unpackData, convertScenesToSrt
         def destFile = file("$buildDir/data/${project.name}.mkv")
