@@ -51,6 +51,12 @@ subprojects {
         destFile = file("$buildDir/data/praat.yaml")
     }
 
+    task convertTobiiLog(type: ConvertTobiiLog) {
+        dependsOn unpackData
+        srcFile = file("$unpackData.destinationDir/Audio_Data_Export.tsv")
+        destFile = file("$buildDir/data/Tobii.json")
+    }
+
     task extractScenes(type: ExtractScenes) {
         dependsOn convertPraatLogToYaml
         srcFile = convertPraatLogToYaml.destFile
@@ -75,6 +81,13 @@ subprojects {
         dependsOn extractScenes
         srcFile = extractScenes.destFile
         destFile = file("$buildDir/data/scenes.srt")
+    }
+
+    task mergeTobiiandPraatLogs(type: MergeLogs) {
+        dependsOn extractScenes, convertTobiiLog
+        praatFile = extractScenes.destFile
+        tobiiFile = convertTobiiLog.destFile
+        destFile = file("$buildDir/data/mergedData.yaml")
     }
 
     task muxStreams(type: Exec) {
