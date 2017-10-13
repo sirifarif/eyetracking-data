@@ -11,15 +11,14 @@ class FindOffsets extends DefaultTask {
 
     @TaskAction
     void findOffsets() {
-        def offSet = (praatStart(praatlog).getTime() - tobiiStart(tobiilog).getTime()) / 1000
-        println "offset is $offSet Seconds"
+        def offSet = praatStart(praatlog).time - tobiiStart(tobiilog).time
+        project.file("gradle.properties").text = "offset=$offSet"
+        println offSet
     }
 
     Date praatStart(File praatlog) {
         def dateFormat = "EEE MMM dd HH:mm:ss yyyy"
         def praatStartingPoint = (praatlog.readLines().get(2) - 'Date: ').trim()
-        def yy = Date.parse(dateFormat, praatStartingPoint)
-        println "praat $yy"
         return Date.parse(dateFormat, praatStartingPoint)
     }
 
@@ -28,8 +27,6 @@ class FindOffsets extends DefaultTask {
         def data = CsvParser.parseCsv(['separator': '\t'], tsvReader)
         def recDate = data[0].RecordingDate
         def localTimeStamp = data[0].LocalTimeStamp
-        def xx = Date.parse("dd.MM.yyyy HH:mm:ss.SSS", "$recDate $localTimeStamp")
-        println "Tobii $xx"
         return Date.parse("dd.MM.yyyy HH:mm:ss.SSS", "$recDate $localTimeStamp")
     }
 }
