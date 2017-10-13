@@ -10,8 +10,14 @@ class FindOffsets extends DefaultTask {
 	tobiilog
 	@TaskAction
 	void findOffsets() {
-		def offSet =  (praatStart(praatlog).getTime() - tobiiStart(tobiilog).getTime()) / 1000
-		println "offset is $offSet Seconds"
+		//def dur = groovy.time.TimeCategory.minus(praatStart(praatlog), tobiiStart(tobiilog))
+		//println "$dur.minutes $dur.seconds $dur.millis"
+		//def durInSeconds = (dur.minutes*60) + dur.seconds + (dur.millis/1000)
+		//println durInSeconds
+
+		def offSet =  praatStart(praatlog).getTime() - tobiiStart(tobiilog).getTime()
+		project.file("gradle.properties").text = "offset=$offSet"
+
 	}
 
 	Date praatStart(File praatlog) {
