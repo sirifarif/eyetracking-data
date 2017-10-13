@@ -70,7 +70,7 @@ class SceneVideoGenerator implements Runnable {
 
     @Override
     void run() {
-        def commandLine = ['ffmpeg', '-framerate', 1 / duration, '-i', pngFile, '-s', '1920x1200', '-vcodec', 'libx264', '-crf', 25, '-pix_fmt', 'yuv420p', '-r', 10, videoFile, '-y']
+        def commandLine = ['ffmpeg', '-framerate', 1 / duration, '-i', pngFile, '-s', '1920x1200', '-vcodec', 'libx264', '-crf', 25, '-pix_fmt', 'yuv420p', '-r', 30, videoFile, '-y']
         println commandLine.join(" ")
         commandLine.execute().waitFor()
     }
