@@ -38,10 +38,6 @@ class GeneratePraatScenes extends DefaultTask {
         }
         new Yaml().load(scenesFile.newReader()).eachWithIndex { scene, s ->
             workerExecutor.submit(PraatSceneGenerator.class) { WorkerConfiguration config ->
-                config.isolationMode = IsolationMode.PROCESS
-                config.forkOptions { JavaForkOptions options ->
-                    options.maxHeapSize = "512m"
-                }
                 config.params audioFile, spectrogramFile, scene.window.start, scene.window.end, project.file("$destDir/scene_${sprintf('%04d', s + 1)}.png")
             }
         }
