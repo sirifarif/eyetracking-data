@@ -1,6 +1,5 @@
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.*
-import org.yaml.snakeyaml.*
 import com.xlson.groovycsv.CsvParser
 import groovy.json.JsonBuilder
 
@@ -29,8 +28,8 @@ class ConvertTobiiLog extends DefaultTask {
                     def gazeEvent = row.'GazeEventType'
                     def gazeDuration = row.'GazeEventDuration'
                     fixationWithData << [
-                            date         : date.format(dateFormat),
-                            value		 : [
+                            date : date.format(dateFormat),
+                            value: [
                                     gaze_type    : gazeEvent,
                                     gaze_duration: gazeDuration,
                                     xPos         : xPosition,
