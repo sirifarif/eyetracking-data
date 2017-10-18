@@ -19,7 +19,7 @@ class ConvertPraatLogToYaml extends DefaultTask {
         def frames = []
         def frameStr = ''
         def offsetStr = project.findProperty('offset')
-        def offset = offsetStr ? Float.parseFloat(offsetStr).round() : 0
+        def offset = offsetStr ? Integer.parseInt(offsetStr) : 0
         srcFile.eachLine { line ->
             switch (line) {
                 case ~/^Editor type:.+/:
@@ -27,7 +27,8 @@ class ConvertPraatLogToYaml extends DefaultTask {
                         def map = yaml.load(frameStr)
                         def date = Date.parse('EEE MMM dd HH:mm:ss yyyy', map.Date, TimeZone.getTimeZone('Europe/Berlin'))
                         use(TimeCategory) {
-                            date = date - offset.seconds
+                            def dateInMilliSeconds = date.getTime() - offset
+							date = new Date(dateInMilliSeconds).format('EEE MMM dd HH:mm:ss.SSS yyyy')
                         }
                         frames << [window: [start: (map.'Window start' - 'seconds') as double,
                                             end  : (map.'Window end' - 'seconds') as double],
