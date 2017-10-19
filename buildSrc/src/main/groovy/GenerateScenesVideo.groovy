@@ -30,10 +30,10 @@ class GenerateSceneVideoSegments extends DefaultTask {
         def firstFrame = project.file("$project.rootDir/firstframe.png")
         def firstFrameVideo = project.file("$destDir/firstFrameVideo_${project.name}.mp4")
         def offsetStr = project.findProperty('offset')
-        def padding = offsetStr ? Float.parseFloat(offsetStr).round().abs() : 0
+        def padding = offsetStr ? Float.parseFloat(offsetStr) : 0
         if (padding > 0) {
             workerExecutor.submit(SceneVideoGenerator.class) { WorkerConfiguration config ->
-                config.params firstFrame, padding, firstFrameVideo
+                config.params firstFrame, padding / 1000, firstFrameVideo
             }
             workerExecutor.await()
             movieListFile.text = "file '$firstFrameVideo'\n"
@@ -42,7 +42,7 @@ class GenerateSceneVideoSegments extends DefaultTask {
         new Yaml().load(scenesFile.newReader()).eachWithIndex { scene, s ->
             def pngFile = project.file("$inputDir/scene_${sprintf('%04d', s + 1)}.png")
             def duration = groovy.time.TimeCategory.minus(scene.end, scene.start)
-            def durInSeconds = duration.minutes * 60 + duration.seconds
+            def durInSeconds = (duration.minutes * 60) + duration.seconds + (duration.millis / 1000) as double
             def videoFile = project.file("$destDir/scene_${sprintf('%04d', s + 1)}.mp4")
             movieListFile.append "file '$videoFile'\n"
             workerExecutor.submit(SceneVideoGenerator.class) { WorkerConfiguration config ->
@@ -57,13 +57,12 @@ class GenerateSceneVideoSegments extends DefaultTask {
 }
 
 class SceneVideoGenerator implements Runnable {
-
     File pngFile
-    int duration
+    double duration
     File videoFile
 
     @Inject
-    SceneVideoGenerator(File pngFile, int duration, File videoFile) {
+    SceneVideoGenerator(File pngFile, double duration, File videoFile) {
         this.pngFile = pngFile
         this.duration = duration
         this.videoFile = videoFile
