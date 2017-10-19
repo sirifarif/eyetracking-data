@@ -18,6 +18,9 @@ class GenerateSceneVideoSegments extends DefaultTask {
     @OutputDirectory
     File destDir
 
+    @OutputFile
+    File finalVideoFile
+
     @Inject
     GenerateSceneVideoSegments(WorkerExecutor workerExecutor) {
         this.workerExecutor = workerExecutor
@@ -38,7 +41,6 @@ class GenerateSceneVideoSegments extends DefaultTask {
             workerExecutor.await()
             movieListFile.text = "file '$firstFrameVideo'\n"
         }
-        def finalVideoFile = project.file("$project.buildDir/sceneMovie.mp4")
         new Yaml().load(scenesFile.newReader()).eachWithIndex { scene, s ->
             def pngFile = project.file("$inputDir/scene_${sprintf('%04d', s + 1)}.png")
             def duration = groovy.time.TimeCategory.minus(scene.end, scene.start)
