@@ -23,8 +23,6 @@ class DrawGazes extends DefaultTask {
         def scriptFile = project.file("$temporaryDir/script.txt")
         scriptFile.text = ""
         def offset
-
-        //def points = new gazePoints() as List
         def ts = []
         def xpos = []
         def ypos = []

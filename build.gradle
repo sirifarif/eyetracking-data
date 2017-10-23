@@ -92,10 +92,10 @@ subprojects {
     }
 
     task drawGazes(type: DrawGazes) {
-        //dependsOn generateSceneVideoSegments, mergeTobiiandPraatLogs.destFile
+        dependsOn generateSceneVideoSegments, mergeTobiiandPraatLogs
         srcFile = generateSceneVideoSegments.finalVideoFile
         gazeFile = mergeTobiiandPraatLogs.destFile
-        fixSymbol = file("$project.rootDir/gs.png")
+        fixSymbol = file("$rootDir/src/images/red_circle.png")
         destFile = file("$buildDir/data/gazeVideo.mp4")
     }
 
