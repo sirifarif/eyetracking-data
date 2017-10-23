@@ -91,6 +91,14 @@ subprojects {
         destFile = file("$buildDir/data/mergedData.yaml")
     }
 
+    task drawGazes(type: DrawGazes) {
+        //dependsOn generateSceneVideoSegments, mergeTobiiandPraatLogs.destFile
+        srcFile = generateSceneVideoSegments.finalVideoFile
+        gazeFile = mergeTobiiandPraatLogs.destFile
+        fixSymbol = file("$project.rootDir/gs.png")
+        destFile = file("$buildDir/data/gazeVideo.mp4")
+    }
+
     task muxStreams(type: Exec) {
         dependsOn unpackData, convertScenesToSrt, generateSceneVideoSegments
         def destFile = file("$buildDir/data/${project.name}.mkv")
