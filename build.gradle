@@ -19,7 +19,7 @@ subprojects {
 
     dependencies {
         data group: 'org.m2ci.msp.eyetracking', name: "eyetracking-multimedia-$project.name", version: '1.0-SNAPSHOT', ext: 'mkv'
-        data group: 'org.m2ci.msp.eyetracking', name: "raw-data-$project.name-praat", version: '0.2-SNAPSHOT', ext: 'zip'
+        data group: 'org.m2ci.msp.eyetracking', name: "raw-data-$project.name-praat", version: '0.1.1', ext: 'zip'
         data group: 'org.m2ci.msp.eyetracking', name: "raw-data-$project.name-textgrid", version: '0.1', ext: 'zip'
         data group: 'org.m2ci.msp.eyetracking', name: "raw-data-$project.name-tobii", version: '0.1', ext: 'zip'
     }
