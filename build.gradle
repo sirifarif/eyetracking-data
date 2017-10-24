@@ -106,11 +106,11 @@ subprojects {
     }
 
     task muxStreams(type: Exec) {
-        dependsOn unpackData, convertScenesToSrt, generateSceneVideoSegments
+        dependsOn unpackData, convertScenesToSrt, drawGazes
         def destFile = file("$buildDir/data/${project.name}.mkv")
         outputs.file destFile
         commandLine 'ffmpeg', '-loglevel', 'panic', '-y',
-                '-i', file("$generateSceneVideoSegments.finalVideoFile"),
+                '-i', file("$drawGazes.destFile"),
                 '-i', file("$unpackData.destinationDir/screencapture.mp4"),
                 '-i', file("$unpackData.destinationDir/audio.flac"),
                 '-i', convertScenesToSrt.destFile, '-disposition:s:0', 'default',
