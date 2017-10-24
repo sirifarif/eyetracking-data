@@ -28,7 +28,7 @@ class ConvertPraatLogToYaml extends DefaultTask {
                         def date = Date.parse('EEE MMM dd HH:mm:ss yyyy', map.Date, TimeZone.getTimeZone('Europe/Berlin'))
                         use(TimeCategory) {
                             def dateInMilliSeconds = date.getTime() - offset
-                            date = new Date(dateInMilliSeconds).format('EEE MMM dd HH:mm:ss.SSS yyyy')
+                            date = new Date(dateInMilliSeconds)
                         }
                         frames << [window: [start: (map.'Window start' - 'seconds') as double,
                                             end  : (map.'Window end' - 'seconds') as double],
