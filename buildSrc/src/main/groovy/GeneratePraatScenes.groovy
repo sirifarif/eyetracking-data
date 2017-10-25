@@ -36,9 +36,17 @@ class GeneratePraatScenes extends DefaultTask {
         project.exec {
             commandLine 'praat', '--no-pref-files', '--no-plugins', '--run', scriptFile
         }
+        // find which praat
+        def stdout = new ByteArrayOutputStream()
+        project.exec {
+            commandLine 'which', 'praat'
+            standardOutput = stdout
+            errorOutput = stdout
+        }
+        def praatBinary = project.file(stdout.toString().trim())
         new Yaml().load(scenesFile.newReader()).eachWithIndex { scene, s ->
             workerExecutor.submit(PraatSceneGenerator.class) { WorkerConfiguration config ->
-                config.params audioFile, spectrogramFile, scene.window.start, scene.window.end, project.file("$destDir/scene_${sprintf('%04d', s + 1)}.png")
+                config.params praatBinary, audioFile, spectrogramFile, scene.window.start, scene.window.end, project.file("$destDir/scene_${sprintf('%04d', s + 1)}.png")
             }
         }
         workerExecutor.await()
@@ -48,6 +56,7 @@ class GeneratePraatScenes extends DefaultTask {
 
 class PraatSceneGenerator implements Runnable {
 
+    File praatBinary
     File soundFile
     File spectrogramFile
     double start
@@ -55,7 +64,8 @@ class PraatSceneGenerator implements Runnable {
     File pngFile
 
     @Inject
-    PraatSceneGenerator(File soundFile, File spectrogramFile, double start, double end, File pngFile) {
+    PraatSceneGenerator(File praatBinary, File soundFile, File spectrogramFile, double start, double end, File pngFile) {
+        this.praatBinary = praatBinary
         this.soundFile = soundFile
         this.spectrogramFile = spectrogramFile
         this.start = start
@@ -80,6 +90,8 @@ class PraatSceneGenerator implements Runnable {
             script.println 'Select outer viewport... 0 12.5 0 8.0'
             script.println "Save as 300-dpi PNG file... $pngFile"
         }
-        ['/usr/local/bin/praat', '--no-pref-files', '--no-plugins', '--run', scriptFile].execute().waitFor()
+        def commandLine = [praatBinary, '--no-pref-files', '--no-plugins', '--run', scriptFile]
+        println commandLine.join(' ')
+        commandLine.execute().waitFor()
     }
 }

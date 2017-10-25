@@ -19,7 +19,7 @@ subprojects {
 
     dependencies {
         data group: 'org.m2ci.msp.eyetracking', name: "eyetracking-multimedia-$project.name", version: '1.0-SNAPSHOT', ext: 'mkv'
-        data group: 'org.m2ci.msp.eyetracking', name: "raw-data-$project.name-praat", version: '0.1', ext: 'zip'
+        data group: 'org.m2ci.msp.eyetracking', name: "raw-data-$project.name-praat", version: '0.1.1', ext: 'zip'
         data group: 'org.m2ci.msp.eyetracking', name: "raw-data-$project.name-textgrid", version: '0.1', ext: 'zip'
         data group: 'org.m2ci.msp.eyetracking', name: "raw-data-$project.name-tobii", version: '0.1', ext: 'zip'
     }
@@ -99,6 +99,12 @@ subprojects {
         destFile = file("$buildDir/data/gazeVideo.mp4")
     }
 
+    task findOffsets(type: FindOffsets) {
+        dependsOn unpackData
+        praatlog = file("$unpackData.destinationDir/praat.log")
+        tobiilog = file("$unpackData.destinationDir/Audio_Data_Export.tsv")
+    }
+
     task muxStreams(type: Exec) {
         dependsOn unpackData, convertScenesToSrt, drawGazes
         def destFile = file("$buildDir/data/${project.name}.mkv")
@@ -108,6 +114,11 @@ subprojects {
                 '-i', file("$unpackData.destinationDir/screencapture.mp4"),
                 '-i', file("$unpackData.destinationDir/audio.flac"),
                 '-i', convertScenesToSrt.destFile, '-disposition:s:0', 'default',
-                '-codec', 'copy', '-map', '0', '-map', '1', destFile
+                '-codec', 'copy',
+                '-map', '0:0',
+                '-map', '1:0',
+                '-map', '2:0',
+                '-map', '3:0',
+                destFile
     }
 }
