@@ -99,6 +99,16 @@ subprojects {
         destFile = file("$buildDir/data/gazeVideo.mp4")
     }
 
+    task dg(type: DG) {
+        //dependsOn generateSceneVideoSegments, mergeTobiiandPraatLogs
+        inputGazeFile = mergeTobiiandPraatLogs.destFile
+        sceneVideos = generateSceneVideoSegments.destDir
+        scriptsDir = file("$buildDir/gazeScripts")
+        fixatedVideoSegments = file("$buildDir/fixatedVideos")
+        fixSymbol = file("$rootDir/src/images/red_circle.png")
+        destVideoFile = file("$buildDir/data/gazeVideo.mp4")
+    }
+
     task findOffsets(type: FindOffsets) {
         dependsOn unpackData
         praatlog = file("$unpackData.destinationDir/praat.log")
