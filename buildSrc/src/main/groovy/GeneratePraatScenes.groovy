@@ -36,13 +36,17 @@ class GeneratePraatScenes extends DefaultTask {
         project.exec {
             commandLine 'praat', '--no-pref-files', '--no-plugins', '--run', scriptFile
         }
+        // find which praat
+        def stdout = new ByteArrayOutputStream()
+        project.exec {
+            commandLine 'which', 'praat'
+            standardOutput = stdout
+            errorOutput = stdout
+        }
+        def praatBinary = project.file(stdout.toString().trim())
         new Yaml().load(scenesFile.newReader()).eachWithIndex { scene, s ->
             workerExecutor.submit(PraatSceneGenerator.class) { WorkerConfiguration config ->
-                config.isolationMode = IsolationMode.PROCESS
-                config.forkOptions { JavaForkOptions options ->
-                    options.maxHeapSize = "512m"
-                }
-                config.params audioFile, spectrogramFile, scene.window.start, scene.window.end, project.file("$destDir/scene_${sprintf('%04d', s + 1)}.png")
+                config.params praatBinary, audioFile, spectrogramFile, scene.window.start, scene.window.end, project.file("$destDir/scene_${sprintf('%04d', s + 1)}.png")
             }
         }
         workerExecutor.await()
@@ -52,6 +56,7 @@ class GeneratePraatScenes extends DefaultTask {
 
 class PraatSceneGenerator implements Runnable {
 
+    File praatBinary
     File soundFile
     File spectrogramFile
     double start
@@ -59,7 +64,8 @@ class PraatSceneGenerator implements Runnable {
     File pngFile
 
     @Inject
-    PraatSceneGenerator(File soundFile, File spectrogramFile, double start, double end, File pngFile) {
+    PraatSceneGenerator(File praatBinary, File soundFile, File spectrogramFile, double start, double end, File pngFile) {
+        this.praatBinary = praatBinary
         this.soundFile = soundFile
         this.spectrogramFile = spectrogramFile
         this.start = start
@@ -73,17 +79,19 @@ class PraatSceneGenerator implements Runnable {
         scriptFile.withWriter { script ->
             script.println 'Helvetica'
             script.println 'Erase all'
-            script.println 'Select inner viewport... 1.5 22.5 1.5 5.5'
+            script.println 'Select inner viewport... 1.0 12.0 1.0 3.0'
             script.println "Read from file... $soundFile"
             script.println "Draw... $start $end 0 0 no Curve"
             script.println "Draw inner box"
             script.println "One mark left... 0.0 yes yes yes"
-            script.println 'Select inner viewport... 1.5 22.5 5.5 9.5'
+            script.println 'Select inner viewport... 1.0 12.0 3.0 5.0'
             script.println "Read from file... $spectrogramFile"
             script.println "Paint... $start $end 0 0 100 yes 50 6 0 yes"
-            script.println 'Select outer viewport... 0 24 0 15'
+            script.println 'Select outer viewport... 0 12.5 0 8.0'
             script.println "Save as 300-dpi PNG file... $pngFile"
         }
-        ['/usr/local/bin/praat', '--no-pref-files', '--no-plugins', '--run', scriptFile].execute().waitFor()
+        def commandLine = [praatBinary, '--no-pref-files', '--no-plugins', '--run', scriptFile]
+        println commandLine.join(' ')
+        commandLine.execute().waitFor()
     }
 }

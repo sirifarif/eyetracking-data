@@ -18,6 +18,9 @@ class GenerateSceneVideoSegments extends DefaultTask {
     @OutputDirectory
     File destDir
 
+    @OutputFile
+    File finalVideoFile
+
     @Inject
     GenerateSceneVideoSegments(WorkerExecutor workerExecutor) {
         this.workerExecutor = workerExecutor
@@ -25,16 +28,27 @@ class GenerateSceneVideoSegments extends DefaultTask {
 
     @TaskAction
     void generate() {
-        def movieListFile = new File("$temporaryDir/movieList.txt")
+        def movieListFile = project.file("$temporaryDir/movieList.txt")
         movieListFile.text = ''
-        def finalVideoFile = project.file("$project.buildDir/sceneMovie.mp4")
+        def firstFrame = project.file("$project.rootDir/firstframe.png")
+        def firstFrameVideo = project.file("$destDir/firstFrameVideo_${project.name}.mp4")
+        def offsetStr = project.findProperty('offset')
+        def padding = offsetStr ? Float.parseFloat(offsetStr) : 0
+        if (padding > 0) {
+            workerExecutor.submit(SceneVideoGenerator.class) { WorkerConfiguration config ->
+                config.params firstFrame, padding / 1000, firstFrameVideo
+            }
+            workerExecutor.await()
+            movieListFile.text = "file '$firstFrameVideo'\n"
+        }
         new Yaml().load(scenesFile.newReader()).eachWithIndex { scene, s ->
             def pngFile = project.file("$inputDir/scene_${sprintf('%04d', s + 1)}.png")
-            def duration = groovy.time.TimeCategory.minus(scene.end, scene.start).seconds
+            def duration = groovy.time.TimeCategory.minus(scene.end, scene.start)
+            def durInSeconds = (duration.minutes * 60) + duration.seconds + (duration.millis / 1000) as double
             def videoFile = project.file("$destDir/scene_${sprintf('%04d', s + 1)}.mp4")
             movieListFile.append "file '$videoFile'\n"
             workerExecutor.submit(SceneVideoGenerator.class) { WorkerConfiguration config ->
-                config.params pngFile, duration, videoFile
+                config.params pngFile, durInSeconds, videoFile
             }
         }
         workerExecutor.await()
@@ -45,13 +59,12 @@ class GenerateSceneVideoSegments extends DefaultTask {
 }
 
 class SceneVideoGenerator implements Runnable {
-
     File pngFile
-    int duration
+    double duration
     File videoFile
 
     @Inject
-    SceneVideoGenerator(File pngFile, int duration, File videoFile) {
+    SceneVideoGenerator(File pngFile, double duration, File videoFile) {
         this.pngFile = pngFile
         this.duration = duration
         this.videoFile = videoFile
@@ -59,7 +72,7 @@ class SceneVideoGenerator implements Runnable {
 
     @Override
     void run() {
-        def commandLine = ['ffmpeg', '-framerate', 1 / duration, '-s', '1920x1080', '-i', pngFile, '-vcodec', 'libx264', '-crf', 25, '-pix_fmt', 'yuv420p', '-r', 10, videoFile, '-y']
+        def commandLine = ['ffmpeg', '-framerate', 1 / duration, '-i', pngFile, '-s', '1920x1200', '-vcodec', 'libx264', '-crf', 25, '-pix_fmt', 'yuv420p', '-r', 30, videoFile, '-y']
         println commandLine.join(" ")
         commandLine.execute().waitFor()
     }
