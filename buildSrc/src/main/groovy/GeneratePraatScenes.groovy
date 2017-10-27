@@ -79,15 +79,15 @@ class PraatSceneGenerator implements Runnable {
         scriptFile.withWriter { script ->
             script.println 'Helvetica'
             script.println 'Erase all'
-            script.println 'Select inner viewport... 1.0 12.0 1.0 3.0'
+            script.println 'Select inner viewport... 0.74 12.1 0.85 3.1'
             script.println "Read from file... $soundFile"
             script.println "Draw... $start $end 0 0 no Curve"
             script.println "Draw inner box"
             script.println "One mark left... 0.0 yes yes yes"
-            script.println 'Select inner viewport... 1.0 12.0 3.0 5.0'
+            script.println 'Select inner viewport... 0.74 12.1 3.1 5.35'
             script.println "Read from file... $spectrogramFile"
             script.println "Paint... $start $end 0 0 100 yes 50 6 0 yes"
-            script.println 'Select outer viewport... 0 12.5 0 8.0'
+            script.println 'Select outer viewport... 0 12.8 0 8.0'
             script.println "Save as 300-dpi PNG file... $pngFile"
         }
         def commandLine = [praatBinary, '--no-pref-files', '--no-plugins', '--run', scriptFile]
