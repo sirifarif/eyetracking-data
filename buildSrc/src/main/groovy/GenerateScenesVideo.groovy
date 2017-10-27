@@ -30,7 +30,7 @@ class GenerateSceneVideoSegments extends DefaultTask {
     void generate() {
         def movieListFile = project.file("$temporaryDir/movieList.txt")
         movieListFile.text = ''
-        def firstFrame = project.file("$project.rootDir/firstframe.png")
+        def firstFrame = project.file("$project.rootDir/src/images/firstFrame.png")
         def firstFrameVideo = project.file("$destDir/firstFrameVideo_${project.name}.mp4")
         def offsetStr = project.findProperty('offset')
         def padding = offsetStr ? Float.parseFloat(offsetStr) : 0
