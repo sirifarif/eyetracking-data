@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Tags SYSTEM "matroskatags.dtd">
+<Tags>
+    <Tag>
+        <Targets>
+            <TargetTypeValue>50</TargetTypeValue>
+        </Targets>
+        <Simple>
+            <Name>COMMENT</Name>
+            <String>https://github.com/m2ci-msp/eyetracking-data</String>
+        </Simple>
+        <Simple>
+            <Name>LICENSE</Name>
+            <String>https://creativecommons.org/licenses/by-nc-sa/4.0/</String>
+        </Simple>
+        <Simple>
+            <Name>COPYRIGHT</Name>
+            <String>http://m2ci.org/</String>
+        </Simple>
+    </Tag>
+</Tags>
