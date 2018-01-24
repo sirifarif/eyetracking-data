@@ -105,6 +105,11 @@ subprojects {
         tobiilog = file("$unpackData.destinationDir/Audio_Data_Export.tsv")
     }
 
+    task fixationOfSpectrogrm(type: FixOfSpectRegion) {
+        dependsOn convertTobiiLog
+        tobiiFile = file(convertTobiiLog.destFile)
+    }
+
     task muxStreams(type: Exec) {
         dependsOn unpackData, convertScenesToSrt, drawGazes
         def destFile = file("$buildDir/data/${project.name}.mkv")
