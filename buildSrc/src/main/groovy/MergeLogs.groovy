@@ -40,6 +40,8 @@ class MergeLogs extends DefaultTask {
                         timeStamp: Date.parse(dateFormat, it.date),
                         gazeType : it.value.gaze_type,
                         gazeDur  : it.value.gaze_duration as double,
+                        gazeRegion : it.value.region,
+                        subRegion : it.value.sub_region,
                         position : [xPos: it.value.xPos as int,
                                     yPos: it.value.yPos as int]
                 ]
