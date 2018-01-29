@@ -106,8 +106,8 @@ subprojects {
     }
 
     task fixationOfSpectrogrm(type: FixOfSpectRegion) {
-        dependsOn convertTobiiLog
-        tobiiFile = file(convertTobiiLog.destFile)
+        dependsOn mergeTobiiandPraatLogs
+        mergeLogsFile = file(mergeTobiiandPraatLogs.destFile)
     }
 
     task muxStreams(type: Exec) {

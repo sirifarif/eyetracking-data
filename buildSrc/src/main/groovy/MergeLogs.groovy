@@ -2,6 +2,8 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.*
 import org.yaml.snakeyaml.*
 
+import java.time.*
+
 class MergeLogs extends DefaultTask {
 
     @InputFile
@@ -15,6 +17,11 @@ class MergeLogs extends DefaultTask {
 
     @TaskAction
     void convert() {
+        //for margins of praat screen
+        def slurper = new groovy.json.JsonSlurper()
+        def mar = slurper.parseText(project.margins)
+        def marginXdiff = (mar.Xright as int) - (mar.Xleft as int)
+
         def data = new groovy.json.JsonSlurper().parse(tobiiFile)
         def opts = new DumperOptions()
         opts.defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
@@ -35,19 +42,25 @@ class MergeLogs extends DefaultTask {
                     windowEnd  : scene.window.end as double,
                     gaze       : []
             ]
-            result.each {
+            result.each { res ->
                 sceneMap.gaze << [
-                        timeStamp: Date.parse(dateFormat, it.date),
-                        gazeType : it.value.gaze_type,
-                        gazeDur  : it.value.gaze_duration as double,
-                        gazeRegion : it.value.region,
-                        subRegion : it.value.sub_region,
-                        position : [xPos: it.value.xPos as int,
-                                    yPos: it.value.yPos as int]
+                        timeStamp : Date.parse(dateFormat, res.date),
+                        signalTime: findSignalTime(scene.window, res.value.xPos as int, marginXdiff),
+                        gazeType  : res.value.gaze_type,
+                        gazeDur   : res.value.gaze_duration as double,
+                        gazeRegion: res.value.region,
+                        subRegion : res.value.sub_region,
+                        position  : [xPos: res.value.xPos as int,
+                                     yPos: res.value.yPos as int]
                 ]
             }
             sceneData << sceneMap
         }
         yaml.dump(sceneData, destFile.newWriter())
+    }
+
+    float findSignalTime(Object sceneWindow, Integer fixationXPosition, Integer marginXdiff) {
+        def sceneWindowDiff = sceneWindow.end - sceneWindow.start
+        return sceneWindow.start + ((fixationXPosition * sceneWindowDiff) / marginXdiff)
     }
 }

@@ -83,13 +83,13 @@ class ConvertTobiiLog extends DefaultTask {
         def middle = lower - (hightOfSpectrogram * 60) / 100.0 as int
 
         if ((yPosition > top) && (yPosition <= middle)) {
-            return 'top-sub-band'
+            return 'top'
         }
         if ((yPosition > middle) && (yPosition <= lower)) {
-            return 'middle-sub-band'
+            return 'middle'
         }
         if ((yPosition > lower) && (yPosition <= bottom)) {
-            return 'lower-sub-band'
+            return 'lower'
         }
     }
 }
