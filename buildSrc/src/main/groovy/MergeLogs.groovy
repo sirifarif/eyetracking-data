@@ -20,7 +20,7 @@ class MergeLogs extends DefaultTask {
         //for margins of praat screen
         def slurper = new groovy.json.JsonSlurper()
         def mar = slurper.parseText(project.margins)
-        def marginXdiff = (mar.Xright as int) - (mar.Xleft as int)
+        def marXDiff = (mar.Xright as int) - (mar.Xleft as int)
 
         def data = new groovy.json.JsonSlurper().parse(tobiiFile)
         def opts = new DumperOptions()
@@ -43,9 +43,16 @@ class MergeLogs extends DefaultTask {
                     gaze       : []
             ]
             result.each { res ->
+                def ts = ''
+                def fixationPosition = res.value.xPos as int
+                if((fixationPosition >= (mar.Xleft as int)) && (fixationPosition <= (mar.Xright as int))) {
+                    fixationPosition = (fixationPosition as int) - (mar.Xleft as int)
+                    ts = findSignalTime(scene.window, fixationPosition, marXDiff)
+                }
+
                 sceneMap.gaze << [
                         timeStamp : Date.parse(dateFormat, res.date),
-                        signalTime: findSignalTime(scene.window, res.value.xPos as int, marginXdiff),
+                        signalTime: ts,
                         gazeType  : res.value.gaze_type,
                         gazeDur   : res.value.gaze_duration as double,
                         gazeRegion: res.value.region,
@@ -59,8 +66,10 @@ class MergeLogs extends DefaultTask {
         yaml.dump(sceneData, destFile.newWriter())
     }
 
-    float findSignalTime(Object sceneWindow, Integer fixationXPosition, Integer marginXdiff) {
+    float findSignalTime(Object sceneWindow, Integer fixXPos, Integer marXDiff) {
         def sceneWindowDiff = sceneWindow.end - sceneWindow.start
-        return sceneWindow.start + ((fixationXPosition * sceneWindowDiff) / marginXdiff)
+        def res = sceneWindow.start + ((fixXPos * sceneWindowDiff) / marXDiff)
+        assert ((res >= 0.0) && (res <= 46.663042))  //46.663042 maximum signal length
+        return res
     }
 }
