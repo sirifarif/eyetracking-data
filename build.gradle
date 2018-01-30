@@ -88,7 +88,13 @@ subprojects {
         dependsOn extractScenes, convertTobiiLog
         praatFile = extractScenes.destFile
         tobiiFile = convertTobiiLog.destFile
-        destFile = file("$buildDir/data/mergedData.yaml")
+        destFile = file("$buildDir/data/merged.yaml")
+    }
+
+    task generateManualBoundary(type: GenerateManualBoundary) {
+        dependsOn unpackData
+        srcFile = srcFile = file("$unpackData.destinationDir/northwind_rm.TextGrid")
+        destFile = file("$buildDir/data/manual.csv")
     }
 
     task drawGazes(type: DrawGazes) {
