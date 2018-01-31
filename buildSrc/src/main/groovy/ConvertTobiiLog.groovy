@@ -70,7 +70,7 @@ class ConvertTobiiLog extends DefaultTask {
                 return 'spectrogram'
             }
             if ((yPosition > YmiddleBottom) && (yPosition <= Ybottom)) {
-                return 'Annotation'
+                return 'annotation'
             }
         }
     }

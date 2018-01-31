@@ -45,21 +45,24 @@ class MergeLogs extends DefaultTask {
             result.each { res ->
                 def ts = ''
                 def fixationPosition = res.value.xPos as int
-                if((fixationPosition >= (mar.Xleft as int)) && (fixationPosition <= (mar.Xright as int))) {
+                if ((fixationPosition >= (mar.Xleft as int)) && (fixationPosition <= (mar.Xright as int))) {
                     fixationPosition = (fixationPosition as int) - (mar.Xleft as int)
                     ts = findSignalTime(scene.window, fixationPosition, marXDiff)
                 }
-
-                sceneMap.gaze << [
+                def gazeMap = [
                         timeStamp : Date.parse(dateFormat, res.date),
                         signalTime: ts,
                         gazeType  : res.value.gaze_type,
                         gazeDur   : res.value.gaze_duration as double,
                         gazeRegion: res.value.region,
-                        subRegion : res.value.sub_region,
                         position  : [xPos: res.value.xPos as int,
                                      yPos: res.value.yPos as int]
                 ]
+
+                if (res.value.region == 'spectrogram') {
+                    gazeMap.subRegion = res.value.sub_region
+                }
+                sceneMap.gaze << gazeMap
             }
             sceneData << sceneMap
         }
