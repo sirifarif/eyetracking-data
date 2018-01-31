@@ -111,9 +111,10 @@ subprojects {
         tobiilog = file("$unpackData.destinationDir/Audio_Data_Export.tsv")
     }
 
-    task fixationOfSpectrogrm(type: FixOfSpectRegion) {
+    task generateFixationFile(type: GenerateFixationFile) {
         dependsOn mergeTobiiandPraatLogs
         mergeLogsFile = file(mergeTobiiandPraatLogs.destFile)
+        gazeFile = file("$buildDir/data/gazeFile.json")
     }
 
     task muxStreams(type: Exec) {
