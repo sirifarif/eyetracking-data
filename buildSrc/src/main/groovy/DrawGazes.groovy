@@ -40,15 +40,10 @@ class DrawGazes extends DefaultTask {
         scriptFile.append(/[0:v][1:v] overlay=x=${xpos[0]}:y=${ypos[0]}:enable='between(t,${ts[0]},${ts[1]})' [tmp];/)
         scriptFile.append('\n')
         for (int ind = 1; ind < (ts.size() - 3); ind++) {
-            scriptFile.append(/[tmp][1:v] overlay=x=${xpos[ind]}:y=${ypos[ind]}:enable='between(t,${ts[ind]},${
-                ts[ind + 1]
-            })' [tmp];/)
+            scriptFile.append(/[tmp][1:v] overlay=x=${xpos[ind]}:y=${ypos[ind]}:enable='between(t,${ts[ind]},${ ts[ind + 1] })' [tmp];/)
             scriptFile.append('\n')
         }
-        scriptFile.append(/[tmp][1:v] overlay=x=${xpos[xpos.size() - 2]}:y=${ypos[ypos.size() - 2]}:enable='between(t,${
-            ts[ts.size() - 2]
-        },${ts[ts.size() - 1]})'/)
-
+        scriptFile.append(/[tmp][1:v] overlay=x=${xpos[xpos.size() - 2]}:y=${ypos[ypos.size() - 2]}:enable='between(t,${ ts[ts.size() - 2] },${ts[ts.size() - 1]})'/)
         project.exec {
             commandLine 'ffmpeg', '-i', srcFile, '-i', fixSymbol, '-filter_complex_script', scriptFile, '-y', destFile
         }
