@@ -1,5 +1,6 @@
 subprojects {
     apply plugin: 'base'
+    apply plugin: 'maven-publish'
 
     repositories {
         ['cloudark', 'localhost'].each { host ->
@@ -132,5 +133,24 @@ subprojects {
                 '-map', '2:0',
                 '-map', '3:0',
                 destFile
+    }
+
+    publishing {
+        publications {
+            yaml(MavenPublication) {
+                artifact(mergeTobiiandPraatLogs.destFile) {
+                    artifactId = "eyetrackingProcessed-$project.name"
+                }
+            }
+        }
+        repositories {
+            maven {
+                url "http://cloudark:8081/artifactory/data-${version.endsWith('SNAPSHOT') ? 'snapshot' : 'release'}-local"
+                credentials {
+                    username = findProperty('cloudarkUser')
+                    password = findProperty('cloudarkApiKey')
+                }
+            }
+        }
     }
 }
