@@ -137,12 +137,18 @@ subprojects {
 
     publishing {
         publications {
-            yaml(MavenPublication) {
+            gazedata(MavenPublication) {
                 artifact(mergeTobiiandPraatLogs.destFile) {
-                    artifactId = "eyetrackingProcessed-$project.name"
+                    artifactId = "eyetracking-gazedata-$project.name"
+                }
+            }
+            segmentation(MavenPublication) {
+                artifact(generateManualBoundary.destFile) {
+                    artifactId = "eyetracking-segmentation-$project.name"
                 }
             }
         }
+
         repositories {
             maven {
                 url "http://cloudark:8081/artifactory/data-${version.endsWith('SNAPSHOT') ? 'snapshot' : 'release'}-local"
