@@ -27,7 +27,7 @@ class GenerateManualBoundary extends DefaultTask {
             for (int i = 1; i <= boundary.size() - 2; i++) {
                 dest.write("${boundary[i]},")
             }
-            dest.write(boundary[boundary.size - 1])
+            dest.write("$boundary[${boundary.size - 1}]\n")
         }
     }
 }
