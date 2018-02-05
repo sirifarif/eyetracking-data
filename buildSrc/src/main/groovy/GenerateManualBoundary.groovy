@@ -23,11 +23,12 @@ class GenerateManualBoundary extends DefaultTask {
         }
         boundary.removeAt(1)
         boundary.add(cols[2])
+
         destFile.withWriter { dest ->
             for (int i = 1; i <= boundary.size() - 2; i++) {
                 dest.write("${boundary[i]},")
             }
-            dest.write("$boundary[${boundary.size - 1}]\n")
+            dest.write("${boundary[boundary.size() - 1]}")
         }
     }
 }
