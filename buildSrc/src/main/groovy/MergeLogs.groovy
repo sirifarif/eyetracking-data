@@ -50,6 +50,7 @@ class MergeLogs extends DefaultTask {
                     ts = findSignalTime(scene.window, fixationPosition, marXDiff)
                 }
                 def gazeMap = [
+                        vp        : project.name - 'vp',
                         timeStamp : Date.parse(dateFormat, res.date),
                         signalTime: ts,
                         gazeType  : res.value.gaze_type,
